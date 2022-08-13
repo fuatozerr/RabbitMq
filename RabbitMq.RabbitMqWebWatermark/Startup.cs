@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using RabbitMq.RabbitMqWebWatermark.BackGroundService;
 using RabbitMq.RabbitMqWebWatermark.Models;
 using RabbitMq.RabbitMqWebWatermark.Services;
 using RabbitMQ.Client;
@@ -36,6 +37,7 @@ namespace RabbitMq.RabbitMqWebWatermark
                 options.UseInMemoryDatabase(databaseName: "productDb");
 
             });
+            services.AddHostedService<ImageWatermarkProcessBackgroundService>();
             services.AddControllersWithViews();
         }
 
