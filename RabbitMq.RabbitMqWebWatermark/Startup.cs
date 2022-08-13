@@ -30,7 +30,7 @@ namespace RabbitMq.RabbitMqWebWatermark
             services.AddSingleton(sp => new ConnectionFactory() { Uri = new Uri(Configuration.GetConnectionString("ConnectionStrings")) });
 
             services.AddSingleton<RabbitMqClientService>();
-
+            services.AddSingleton<RabbitMQPublisher>();
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseInMemoryDatabase(databaseName: "productDb");
