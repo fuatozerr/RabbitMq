@@ -31,13 +31,8 @@ namespace RabbitMq.RabbitMqWebWatermark.BackGroundService
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var consumer = new AsyncEventingBasicConsumer(_channel);
-
             _channel.BasicConsume(RabbitMqClientService.QueueName, false, consumer);
-
             consumer.Received += Consumer_Received;
-
-
-
             return Task.CompletedTask;
         }
 
@@ -46,8 +41,6 @@ namespace RabbitMq.RabbitMqWebWatermark.BackGroundService
             try
             {
                 var productImageCreated = JsonSerializer.Deserialize<productImageCreatedEvent>(Encoding.UTF8.GetString(@event.Body.ToArray()));
-
-
 
                 var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/Images", productImageCreated.ImageName);
 
@@ -62,17 +55,17 @@ namespace RabbitMq.RabbitMqWebWatermark.BackGroundService
                 var textSize = graphic.MeasureString(siteName, font);
 
                 var color = Color.FromArgb(128, 255, 255, 255);
+
                 var brush = new SolidBrush(color);
 
                 var position = new Point(img.Width - ((int)textSize.Width + 30), img.Height - ((int)textSize.Height + 30));
-
 
                 graphic.DrawString(siteName, font, brush, position);
 
                 img.Save("wwwroot/watermarks/" + productImageCreated.ImageName);
 
-
                 img.Dispose();
+
                 graphic.Dispose();
 
                 _channel.BasicAck(@event.DeliveryTag, false);
@@ -82,8 +75,6 @@ namespace RabbitMq.RabbitMqWebWatermark.BackGroundService
 
                 throw;
             }
-
-
             return Task.CompletedTask;
         }
 
