@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RabbitMq.RabbitMqWebWatermark.Models;
 using RabbitMq.RabbitMqWebWatermark.Services;
+using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -55,14 +58,38 @@ namespace RabbitMq.RabbitMqWebWatermark.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Price,Stock,ImageName")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,Name,Price,Stock,ImageName")] Product product, IFormFile ImageFile)
         {
-            if (ModelState.IsValid)
+
+            if (!ModelState.IsValid) return View(product);
+
+
+            if (ImageFile is { Length: > 0 })
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var randomImageName = Guid.NewGuid() + Path.GetExtension(ImageFile.FileName);
+
+
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", randomImageName);
+
+
+                await using FileStream stream = new(path, FileMode.Create);
+
+
+                await ImageFile.CopyToAsync(stream);
+
+
+                _rabbitMQPublisher.Publish(new productImageCreatedEvent() { ImageName = randomImageName });
+
+                product.ImageName = randomImageName;
             }
+
+
+
+
+            _context.Add(product);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+
             return View(product);
         }
 
