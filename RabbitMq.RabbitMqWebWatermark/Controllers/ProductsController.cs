@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RabbitMq.RabbitMqWebWatermark.Models;
+using RabbitMq.RabbitMqWebWatermark.Services;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,11 +10,14 @@ namespace RabbitMq.RabbitMqWebWatermark.Controllers
     public class ProductsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly RabbitMQPublisher _rabbitMQPublisher;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(AppDbContext context, RabbitMQPublisher rabbitMQPublisher)
         {
             _context = context;
+            _rabbitMQPublisher = rabbitMQPublisher;
         }
+
 
         // GET: Products
         public async Task<IActionResult> Index()
